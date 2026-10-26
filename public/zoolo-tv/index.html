@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoolo TV</title>
+<style>
+:root{color-scheme:dark;--bg:#0f0f0f;--surface:#181818;--surface2:#272727;--text:#f1f1f1;--muted:#aaa;--border:#303030;--red:#ff0033}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px Roboto,Arial,system-ui,sans-serif}
+button,input{font:inherit}
+.topbar{height:58px;position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:22px;padding:0 22px;background:rgba(15,15,15,.97);border-bottom:1px solid #222}
+.brand{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;white-space:nowrap;letter-spacing:-.7px}
+.playmark{display:inline-flex;align-items:center;justify-content:center;width:30px;height:21px;border-radius:7px;background:var(--red);font-size:13px;color:white}
+.mode-tabs{display:flex;gap:6px;white-space:nowrap}.mode-tab{border:0;border-radius:18px;background:#272727;color:#eee;padding:8px 13px;cursor:pointer}.mode-tab.active{background:#f1f1f1;color:#111;font-weight:700}.playlist-bar{display:flex;flex-wrap:wrap;gap:8px;max-width:1000px;margin:14px auto;padding:0 24px}.playlist-bar[hidden]{display:none}.playlist-bar input{min-width:0;flex:1;padding:0 14px;height:42px;border:1px solid #333;border-radius:22px;background:#121212;color:#f1f1f1}.playlist-bar button{border:0;border-radius:22px;padding:0 18px;background:#272727;color:white;cursor:pointer}.playlist-message{flex:1 0 100%;max-width:none;margin:0;padding:0 6px;color:#aaa;font-size:12px}.searchbar{display:flex;max-width:620px;width:100%;margin:auto}
+.searchbar input{min-width:0;flex:1;height:40px;padding:0 17px;background:#121212;color:var(--text);border:1px solid #333;border-radius:22px 0 0 22px;outline:none}
+.searchbar input:focus{border-color:#3d6db4}
+.searchbar button{height:40px;width:62px;border:1px solid #333;border-left:0;border-radius:0 22px 22px 0;background:#272727;color:white;cursor:pointer;font-size:18px}
+.toplabel{font-size:12px;color:var(--muted);white-space:nowrap}
+.page{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:24px;max-width:1700px;margin:0 auto;padding:22px 24px}
+.maincol{min-width:0}
+.player-sticky{position:sticky;top:76px;z-index:15}.player-stage{position:relative}.player-controls{position:absolute;left:14px;right:14px;bottom:14px;z-index:3;background:linear-gradient(90deg,rgba(14,14,14,.92),rgba(20,20,20,.78));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.38)}.fullscreen-guide{position:absolute;inset:0 0 0 auto;z-index:5;display:flex;flex-direction:column;width:min(390px,88vw);padding:16px;background:rgba(18,18,18,.97);border-left:1px solid #414141;box-shadow:-20px 0 50px rgba(0,0,0,.5)}.fullscreen-guide[hidden]{display:none}.guide-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:20px;font-weight:800}.guide-close{width:48px;height:48px;border:0;border-radius:12px;background:#333;color:#fff;font-size:24px;cursor:pointer}.fullscreen-guide .filter-row{flex-wrap:nowrap;overflow-x:auto}.fullscreen-guide .channel-list{flex:1;min-height:0;max-height:none;overflow:auto}.volume-control{display:flex;align-items:center;gap:7px;min-height:44px;padding:0 8px;color:#fff}.volume-control input{width:90px;accent-color:#ff0033;cursor:pointer}
+.video-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+video{width:100%;height:100%;display:block;object-fit:contain;background:#000}.video-box.fit-cover video{object-fit:cover}.video-box.fit-fill video{object-fit:fill}.player-stage:fullscreen{display:block;position:relative;width:100vw;height:100vh;background:#000;padding:0}.player-stage:fullscreen .video-box{width:100%;height:100%;min-height:0;aspect-ratio:auto;border-radius:0}.player-stage:fullscreen .player-controls{left:clamp(12px,3vw,48px);right:clamp(12px,3vw,48px);bottom:clamp(12px,3vh,36px);transition:opacity .2s ease,visibility .2s}.player-stage:fullscreen.controls-hidden .player-controls{opacity:0;visibility:hidden;pointer-events:none}.video-box:fullscreen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;border-radius:0}.video-box:fullscreen video{width:100%;height:100%}.video-overlay{position:absolute;inset:0;display:grid;place-items:center;color:#ddd;background:radial-gradient(ellipse,rgba(20,20,20,.58),rgba(0,0,0,.15));font-size:clamp(16px,2vw,26px);text-align:center;pointer-events:none}.video-overlay[hidden]{display:none}.video-box{position:relative}.player-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;background:#181818;border:1px solid #2a2a2a;border-top:0;border-radius:0 0 12px 12px}.player-control{min-height:48px;padding:0 16px;border:1px solid #3b3b3b;border-radius:12px;background:#292929;color:#fff;font-weight:700;cursor:pointer}.player-control.primary{background:#d9002b;border-color:#ff3355}.control-spacer{flex:1}.player-control:hover{background:#414141}.player-control.primary:hover{background:#f00036}.control-primary,.control-secondary{display:flex;align-items:center;gap:8px}.control-primary{flex:1}.control-secondary{margin-left:auto}
+.title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:15px 0 8px}
+h1{font-size:20px;line-height:1.35;margin:0 0 5px;font-weight:700}
+.status{color:var(--muted);font-size:12px;line-height:1.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.action{border:0;border-radius:20px;padding:9px 14px;background:#272727;color:#f1f1f1;text-decoration:none;cursor:pointer}
+.action:hover{background:#3a3a3a}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffd447;outline-offset:3px;box-shadow:0 0 0 5px rgba(255,212,71,.2)}.filter,.mode-tab,.playlist-bar button{min-height:44px}.channel{min-height:68px}
+.hint{margin-top:14px;color:#aaa;font-size:12px;line-height:1.55}
+.sidebar{min-width:0;align-self:start;position:sticky;top:76px}
+.sidebar-title{font-size:18px;font-weight:700;margin:0 0 12px}
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;scrollbar-width:thin}
+.filter{border:0;border-radius:8px;background:#272727;color:#eee;padding:8px 12px;white-space:nowrap;cursor:pointer}
+.filter.active{background:#f1f1f1;color:#111;font-weight:700}
+.channel-list{max-height:calc(100vh - 190px);overflow-y:auto;overscroll-behavior:contain;scrollbar-color:#555 transparent;scrollbar-width:thin;padding-right:3px}
+.channel{width:100%;display:flex;align-items:center;gap:11px;padding:9px 8px;margin:0 0 4px;text-align:left;color:var(--text);background:transparent;border:1px solid transparent;border-radius:10px;cursor:pointer}
+.channel:hover,.channel.active{background:#272727}
+.channel.active{border-color:#444}
+.channel:disabled{opacity:.48;cursor:not-allowed}
+.logo{width:78px;height:48px;flex:0 0 78px;object-fit:contain;background:#222;border-radius:7px;padding:4px}
+.logo-fallback{display:flex;align-items:center;justify-content:center;width:78px;height:48px;flex:0 0 78px;background:#252525;border-radius:7px;font-weight:800;color:#ff6868}
+.ch-info{min-width:0;flex:1}
+.ch-name{display:block;font-size:13px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.ch-meta{display:block;margin-top:4px;font-size:11px;color:#aaa}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2bc48a;margin-right:5px}
+.not-found .live-dot{background:#777}
+.empty{display:none;color:#aaa;padding:18px 8px}
+.mobile-channels{display:none}
+@media(max-width:900px){
+ .topbar{height:auto;min-height:100px;display:grid;grid-template-columns:auto 1fr;align-content:center;gap:9px;padding:10px 14px;background:rgba(13,14,18,.98);border-bottom:1px solid #252833}
+ .brand{font-size:18px}.mode-tabs{justify-self:end;gap:6px}.mode-tab{padding:8px 13px;border:1px solid #343743;background:#20222b}.mode-tab.active{background:#f4f5f7;color:#121318;border-color:#f4f5f7}
+ .searchbar{grid-column:1/-1;order:initial;max-width:none;margin:0}.searchbar input{height:42px;background:#191b22;border-color:#343743;border-radius:14px 0 0 14px}.searchbar button{height:42px;width:52px;border-radius:0 14px 14px 0;background:#242631;border-color:#343743}
+ .toplabel{display:none}.page{display:flex;flex-direction:column;gap:16px;padding:0 0 28px}
+ .playlist-bar{position:sticky;top:100px;z-index:25;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;margin:0;padding:10px 12px;background:#11131a;border-bottom:1px solid #292c36}.playlist-bar input{height:42px;border-radius:13px;background:#1a1c24;border-color:#343743;padding:0 12px;font-size:13px}.playlist-bar button{min-height:42px;padding:0 12px;border-radius:13px;background:#252833;font-size:12px}.playlist-message{padding:2px 4px}
+ .maincol{width:100%;padding-top:calc(56.25vw + 40px)}.player-sticky{position:fixed;top:100px;left:0;right:0;z-index:30;background:#090a0e}.player-stage{width:100%}.player-controls{left:8px;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:linear-gradient(180deg,rgba(13,14,18,.72),rgba(9,10,13,.96));border-color:rgba(255,255,255,.13)}
+ .control-primary,.control-secondary{display:flex;align-items:center;justify-content:center;gap:7px;width:100%}.control-primary .player-control{flex:1;min-width:0}.control-primary .primary{flex:1.25}.control-secondary .player-control{flex:0 0 46px;min-width:46px;padding:0}.control-secondary .volume-control{flex:1;justify-content:center;min-width:92px}.control-secondary .volume-control input{width:min(23vw,100px)}.control-spacer{display:none}
+ .player-control{min-height:44px;padding:0 10px;border-radius:12px;font-size:13px}.player-control:active,.filter:active,.channel:active{transform:scale(.97)}
+ body.m3u-mode .player-sticky{top:181px}.video-box{border-radius:0}
+ .title-row{padding:0 14px;margin:12px 0 8px}.actions,.hint{margin-left:14px;margin-right:14px}.sidebar{display:none}
+ .mobile-channels{display:block;padding:16px 12px 20px;background:linear-gradient(180deg,#11131a,#0e0f13)}.mobile-channels .sidebar-title{margin:0 2px 12px;font-size:19px;letter-spacing:-.2px}
+ .mobile-channels .filter-row{gap:7px;margin:0 -12px 10px;padding:0 12px 10px;scrollbar-width:none}.mobile-channels .filter-row::-webkit-scrollbar{display:none}.mobile-channels .filter{min-height:40px;padding:0 15px;border-radius:999px;background:#222530;border:1px solid #30333e;color:#e6e7eb;font-weight:600}.mobile-channels .filter.active{background:#e5093a;border-color:#e5093a;color:#fff}
+ .mobile-channels .channel-list{max-height:none;overflow:visible;padding:0;display:flex;flex-direction:column;gap:8px}.mobile-channels .channel{min-height:74px;padding:10px 12px;border:1px solid #292c35;background:#171920;border-radius:15px;gap:12px;box-shadow:0 3px 12px rgba(0,0,0,.14)}.mobile-channels .channel.active{border-color:#e5093a;background:#21171d;box-shadow:0 0 0 1px rgba(229,9,58,.16)}.mobile-channels .logo,.mobile-channels .logo-fallback{width:68px;height:48px;flex-basis:68px;border-radius:10px}.mobile-channels .ch-name{font-size:14px;font-weight:700;line-height:1.3}.mobile-channels .ch-meta{margin-top:5px;font-size:11px;color:#aeb1bb}.mobile-channels .channel:after{content:'›';flex:none;margin-left:auto;color:#aeb1bb;font-size:26px;font-weight:400}
+ .mobile-channels .empty{padding:22px 12px;border:1px dashed #363945;border-radius:14px;color:#aeb1bb}
+}
+@media(max-width:480px){
+ .topbar{grid-template-columns:auto 1fr;gap:8px;padding:9px 10px;min-height:96px}.brand{font-size:16px;gap:6px}.playmark{width:27px;height:19px}.mode-tabs{gap:4px}.mode-tab{min-height:38px;padding:0 10px;font-size:11px}
+ .playlist-bar{top:96px;grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:8px 9px}.playlist-bar input{grid-column:1/-1}.playlist-bar button{font-size:11px;padding:0 10px}.playlist-message{grid-column:1/-1}.player-sticky{top:96px}body.m3u-mode .player-sticky{top:176px}
+ .maincol{padding-top:calc(56.25vw + 38px)}.player-controls{left:7px;right:7px;bottom:7px;gap:5px;padding:7px;border-radius:14px}.control-primary,.control-secondary{gap:6px}.control-primary .player-control{height:42px;min-height:42px}.control-secondary .player-control{height:40px;min-height:40px;flex-basis:42px;min-width:42px}.control-secondary .volume-control{min-height:40px;min-width:70px;padding:0 4px;gap:4px}.control-secondary .volume-control input{width:min(22vw,76px)}.player-control span{display:none}
+ .mobile-channels{padding-left:10px;padding-right:10px}.mobile-channels .channel{min-height:70px;padding:9px 10px}.mobile-channels .logo,.mobile-channels .logo-fallback{width:62px;height:44px;flex-basis:62px}.mobile-channels .ch-name{font-size:13px}
+}.player-stage>.player-controls{background:linear-gradient(90deg,rgba(14,14,14,.92),rgba(20,20,20,.78));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+/* compact mobile OTT layout */
+@media(max-width:600px){
+ .topbar{min-height:84px;padding:6px 9px;gap:6px;grid-template-columns:auto 1fr}.brand{font-size:14px;gap:6px}.playmark{width:23px;height:17px;border-radius:5px;font-size:11px}.mode-tabs{gap:4px}.mode-tab{min-height:32px;padding:0 9px;border-radius:999px;font-size:10px}
+ .searchbar input,.searchbar button{height:34px}.searchbar button{width:42px}.searchbar input{padding:0 11px;font-size:12px}
+ .playlist-bar{top:84px;padding:6px 8px;gap:5px}.playlist-bar input{height:34px;font-size:11px}.playlist-bar button{min-height:34px;padding:0 9px;font-size:10px}.playlist-message{font-size:10px;line-height:1.25}
+ .player-sticky{top:84px}.maincol{padding-top:calc(56.25vw + 30px)}body.m3u-mode .player-sticky{top:184px}
+ .player-controls{left:6px;right:6px;bottom:6px;gap:4px;padding:6px;border-radius:12px}.control-primary,.control-secondary{gap:5px}.control-primary .player-control{height:36px;min-height:36px;padding:0 7px;border-radius:9px;font-size:12px}.control-primary .primary{flex:1.15}.control-secondary .player-control{height:34px;min-height:34px;flex-basis:38px;min-width:38px;border-radius:9px}.control-secondary .volume-control{min-height:34px;min-width:62px;gap:3px;padding:0 3px}.control-secondary .volume-control input{width:min(19vw,64px)}.player-control span{display:none}
+ .title-row{margin:8px 0 5px;padding:0 10px}h1{font-size:15px;margin-bottom:3px}.status{font-size:10px;line-height:1.35}.actions,.hint{margin-left:10px;margin-right:10px}.actions{gap:6px;margin-top:8px}.action{padding:7px 10px;font-size:11px}.hint{margin-top:8px;font-size:10px}
+ .mobile-channels{padding:11px 9px 16px}.mobile-channels .sidebar-title{margin:0 2px 8px;font-size:16px}.mobile-channels .filter-row{gap:5px;margin:0 -9px 7px;padding:0 9px 6px}.mobile-channels .filter{min-height:32px;padding:0 12px;font-size:11px;border-radius:999px}
+ .mobile-channels .channel-list{gap:5px}.mobile-channels .channel{min-height:58px;padding:7px 9px;border-radius:12px;gap:9px}.mobile-channels .logo,.mobile-channels .logo-fallback{width:50px;height:36px;flex-basis:50px;border-radius:8px;padding:3px}.mobile-channels .ch-name{font-size:12px;line-height:1.2}.mobile-channels .ch-meta{margin-top:3px;font-size:10px}.mobile-channels .channel:after{font-size:21px}
+ .fullscreen-guide{width:min(320px,90vw);padding:9px}.guide-head{font-size:16px;margin-bottom:6px}.guide-close{width:38px;height:38px}.fullscreen-guide .filter{min-height:34px;padding:0 11px;font-size:11px}.fullscreen-guide .channel{min-height:54px;padding:6px 8px}
+}
+@media(max-width:600px){
+ .player-stage.controls-hidden .player-controls{opacity:0;visibility:hidden;pointer-events:none}
+ .player-controls{height:42px;min-height:42px;left:6px;right:6px;bottom:6px;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:space-around;gap:1px;padding:4px 6px;border-radius:11px;background:rgba(12,13,17,.78);backdrop-filter:blur(12px)}
+ .control-primary,.control-secondary{display:contents}
+ .player-controls .player-control,.control-primary .player-control,.control-secondary .player-control{flex:0 0 34px;width:34px;min-width:34px;height:32px;min-height:32px;padding:0;border:0;border-radius:9px;background:transparent;font-size:17px}
+ .player-controls .player-control.primary{background:#e5093a;color:#fff;border-radius:9px}
+ .player-controls .player-control span{display:none}
+ .player-controls .volume-control{display:none}
+}
+/* end compact mobile OTT layout */
+</style>
+<meta name="theme-color" content="#101116">
+<meta name="description" content="Watch live Indian TV channels with playlists and fullscreen playback.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="playmark">▶</span><span>Live TV</span></div>
+  <nav class="mode-tabs" aria-label="Channel mode"><button id="homeMode" class="mode-tab active" type="button">Home</button><button id="m3uMode" class="mode-tab" type="button">M3U URL</button></nav>
+  <form class="searchbar" id="topSearch">
+    <input id="search" type="search" placeholder="Search channels" aria-label="Search channels">
+    <button type="submit" aria-label="Search">⌕</button>
+  </form>
+  <div class="toplabel">Indian channels</div>
+</header>
+<div id="playlistBar" class="playlist-bar" hidden><input id="playlistUrl" type="url" value="https://iptv-org.github.io/iptv/index.m3u" placeholder="Paste M3U / M3U8 playlist URL" aria-label="M3U playlist URL"><button id="loadPlaylist" type="button">Load URL</button><button id="chooseLocalPlaylist" type="button">Choose local M3U file</button><input id="localPlaylistFile" type="file" accept=".m3u,.m3u8,audio/x-mpegurl,application/vnd.apple.mpegurl,text/plain" hidden><div id="playlistMessage" class="playlist-message" aria-live="polite"></div></div>
+
+<div class="page">
+  <main class="maincol">
+    <div class="player-sticky">
+      <div class="player-stage" id="playerStage"><div class="video-box fit-contain" id="videoBox"><video id="video" playsinline preload="none"></video><div id="videoOverlay" class="video-overlay">Choose a channel to start watching</div></div><aside id="fullscreenGuide" class="fullscreen-guide" aria-label="Channel guide" hidden><div class="guide-head"><span>Channels</span><button id="closeGuide" class="guide-close" type="button" aria-label="Close channel guide">×</button></div><div id="guideFilters" class="filter-row"></div><div id="guideList" class="channel-list"></div><div id="guideEmpty" class="empty">No channels in this category.</div></aside><div class="player-controls" aria-label="Video controls"><div class="control-primary"><button id="previousChannel" class="player-control" type="button" aria-label="Previous channel">◀ <span>Back</span></button><button id="playPause" class="player-control primary" type="button" aria-label="Play">▶ <span>Play</span></button><button id="nextChannel" class="player-control" type="button" aria-label="Next channel"><span>Next</span> ▶</button><button id="openGuide" class="player-control" type="button" aria-label="Open channel guide">☷ <span>Channels</span></button></div><div class="control-secondary"><button id="fitMode" class="player-control" type="button" aria-label="Screen fit mode">▧ <span>Fit</span></button><button id="fullScreen" class="player-control" type="button" aria-label="Enter fullscreen">⛶ <span>Full screen</span></button><button id="muteToggle" class="player-control" type="button" aria-label="Mute">🔊 <span>Sound</span></button><label class="volume-control" title="Volume">🔊 <input id="volumeControl" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume"></label></div></div></div>
+    </div>
+      <div class="title-row">
+        <div>
+          <h1 id="nowTitle">Choose a channel to start watching</h1>
+          <div id="status" class="status">Select any available channel from the list.</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="stop" class="action" type="button">Stop playback</button>
+        <a id="openUrl" class="action" href="#" target="_blank" rel="noopener" hidden>Open stream directly ↗</a>
+      </div>
+      <div class="hint">If a stream does not play, it may be offline, geo-restricted, or block playback in web browsers. “Open stream directly” can help test the URL. Some playlist entries may not be available.</div>
+  </main>
+
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Channels</h2>
+    <div id="desktopFilters" class="filter-row"></div>
+    <div id="desktopList" class="channel-list"></div>
+    <div id="desktopEmpty" class="empty">No channels found.</div>
+  </aside>
+
+  <section class="mobile-channels">
+    <h2 class="sidebar-title">Channels</h2>
+    <div id="mobileFilters" class="filter-row"></div>
+    <div id="mobileList" class="channel-list"></div>
+    <div id="mobileEmpty" class="empty">No channels found.</div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<script>
+const homeChannels = [{"category":"News","display":"Zee News (1080p)","url":"https://dknttpxmr0dwf.cloudfront.net/index_57.m3u8","source_name":"Zee News (1080p)","logo":"https://dtil.tmsimg.com/assets/GNLZZGG0023VWYC.png?lock=720x540","available":true,"note":""},{"category":"News","display":"Zee Uttar Pradesh / Uttarakhand (720p)","url":"https://duw35ict5q7th.cloudfront.net/index_3.m3u8","source_name":"Zee Uttar Pradesh/Uttarakhand (720p)","logo":"https://dtil.tmsimg.com/assets/GNLZZGG002317GQ.png?lock=720x540","available":true,"note":"Playlist mein naam: Zee Uttar Pradesh/Uttarakhand (720p)"},{"category":"Entertainment","display":"Colors (576p)","url":"https://raw.githubusercontent.com/amazeyourself/adaptive-streams/refs/heads/main/streams/sg/YuppTV/ColorsAPAC.m3u8","source_name":"Colors (576p)","logo":"https://i.imgur.com/M8uCJ0D.png","available":true,"note":""},{"category":"Entertainment","display":"Star Bharat (576p)","url":"","source_name":"","logo":"","available":false,"note":"Uploaded M3U file mein nahi mila"},{"category":"Movies","display":"Zee Cine Classic (1080p)","url":"https://amg00862-amg00862c8-amgplt0173.playout.now3.amagi.tv/playlist/amg00862-amg00862c8-amgplt0173/playlist.m3u8","source_name":"Zee Cine Classic (1080p)","logo":"https://i.imgur.com/QCRhS1n.png","available":true,"note":""},{"category":"Movies","display":"Zee South Flix (1080p)","url":"https://amg00862-amg00862c9-amgplt0173.playout.now3.amagi.tv/playlist/amg00862-amg00862c9-amgplt0173/playlist.m3u8","source_name":"Zee South Flix (1080p)","logo":"https://d3bd0tgyk368z1.cloudfront.net/zeelg/LG%20logo%20artwork/400x200/zsouthflix.png","available":true,"note":""},{"category":"Movies","display":"Zee Cinema (576p)","url":"https://d1g8wgjurz8via.cloudfront.net/bpk-tv/NGCHD/default/NGCHD.m3u8","source_name":"Zee Cinema (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_CINEMA/images/LOGO_HD/LOGO_HD_image.png","available":true,"note":"Playlist mein naam: Zee Cinema (576p)"},{"category":"Movies","display":"Goldmines","url":"https://streams.tangotv.in/GOLDMINES/ORIGIN/index.m3u8","source_name":"Goldmines (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GOLDMINES/images/LOGO_HD/image.png","available":true,"note":"Playlist mein naam: Goldmines (576p)"},{"category":"Movies","display":"Goldmines Bollywood","url":"https://mumt03.tangotv.in/Dsly5z3HGOLDMINESBOLLYWOOD/index.m3u8","source_name":"Goldmines Bollywood (576p)","logo":"https://i.imgur.com/6mNQ9mM.png","available":true,"note":"Playlist mein naam: Goldmines Bollywood (576p)"},{"category":"Movies","display":"Goldmines Movies (576p)","url":"http://103.175.73.12:8080/live/51/51_0.m3u8","source_name":"Goldmines Movies (576p)","logo":"https://dtil.tmsimg.com/assets/s142881_ld_h15_aa.png?lock=720x540","available":true,"note":"Playlist entry had malformed metadata; stream URL was retained."},{"category":"Movies","display":"Colors Cineplex (576p)","url":"https://raw.githubusercontent.com/amazeyourself/adaptive-streams/refs/heads/main/streams/gb/YuppTV/ColorsCineplexUK.m3u8","source_name":"Colors Cineplex (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_CINEPLEX/images/LOGO_HD/image.png","available":true,"note":"Playlist mein naam: Colors Cineplex (576p)"},{"category":"Music","display":"9X Jalwa (1080p)","url":"https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8","source_name":"9X Jalwa (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_9X_JALWA/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Music","display":"9X Tashan (1080p)","url":"https://amg01281-9xmediapvtltd-9xtashan-samsungin-xz1sd.amagi.tv/playlist/amg01281-9xmediapvtltd-9xtashan-samsungin/playlist.m3u8","source_name":"9X Tashan (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_9X_TASHAN/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Music","display":"Music India (576p)","url":"https://streams.tangotv.in/MUSICINDIA/ORIGIN/index.m3u8","source_name":"Music India (576p)","logo":"https://dtil.tmsimg.com/assets/s143563_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Music","display":"Zoom India (720p)","url":"https://dai.google.com/linear/hls/event/JCAm25qkRXiKcK1AJMlvKQ/master.m3u8","source_name":"Zoom (India) (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZOOM/images/LOGO_HD/image.png","available":true,"note":"Playlist mein naam: Zoom (India) (720p)"},{"category":"Movies","display":"B4U Kadak (576p)","url":"https://streams.tangotv.in/B4UKADAK/ORIGIN/index.m3u8","source_name":"B4U Kadak (576p)","logo":"https://dtil.tmsimg.com/assets/s142695_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"B4U Movies (576p)","url":"https://streams.tangotv.in/B4UMOVIES/ORIGIN/index.m3u8","source_name":"B4U Movies (576p)","logo":"https://i.imgur.com/M9kMFJl.png","available":true,"note":""},{"category":"Music","display":"B4U Music (1080p)","url":"https://amg01408-amg01408c5-amgplt0747.playout.now3.amagi.tv/b4um001/playlist.m3u8","source_name":"B4U Music (1080p)","logo":"https://dtil.tmsimg.com/assets/s158141_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Entertainment","display":"Anmol TV (720p)","url":"https://drk6xq0vhn.gpcdn.net/live/zee_anmol_abr/index.m3u8","source_name":"Anmol TV (720p)","logo":"https://dtil.tmsimg.com/assets/GNLZZGG00260HWS.png?lock=720x540","available":true,"note":""},{"category":"Documentary","display":"Animal Planet (India) (720p)","url":"https://drk6xq0vhn.gpcdn.net/live/animal_planet_sd_abr/index.m3u8","source_name":"Animal Planet (India) (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ANIMAL_PLANET/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Movies","display":"B4U Bhojpuri Plus (1080p)","url":"https://cc-t2mudtkmuz4wb.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-t2mudtkmuz4wb/B4U_Bhojpuri/master.m3u8","source_name":"B4U Bhojpuri Plus (1080p)","logo":"https://i.imgur.com/NwOQUDp.png","available":true,"note":""},{"category":"Music","display":"Balle Balle (576p)","url":"https://streams.tangotv.in/BALLEBALLE/ORIGIN/index.m3u8","source_name":"Balle Balle (576p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/Balle_Balle_TV.png","available":true,"note":""},{"category":"News","display":"Bansal News (720p)","url":"https://8yzmq2gbdvax-hls-live.wmncdn.net/bansalnewstv1/live1.stream/playlist.m3u8","source_name":"Bansal News (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BANSAL_NEWS/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"Bharat24 (720p)","url":"https://cdn.ottlive.co.in/bharat24/index.m3u8","source_name":"Bharat24 (720p)","logo":"https://dtil.tmsimg.com/assets/s142710_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"Bhojpuri Cinema (720p)","url":"https://live-bhojpuri.akamaized.net/liveabr/playlist.m3u8","source_name":"Bhojpuri Cinema (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHOJPURI_CINEMA/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Entertainment","display":"Colors HD (1080p)","url":"http://103.151.60.162:2122/play/a02q/index.m3u8?hls","source_name":"Colors HD (1080p)","logo":"https://i.imgur.com/M8uCJ0D.png","available":true,"note":""},{"category":"Entertainment","display":"DD National (576p)","url":"https://cdn.pishow.tv/ott/live/11/master.m3u8","source_name":"DD National (576p)","logo":"https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20National.png","available":true,"note":""},{"category":"Entertainment","display":"DD National HD (1080p)","url":"https://mumbai-edge.smartplaytv.in/DDNational/index.m3u8","source_name":"DD National HD (1080p)","logo":"https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20National.png","available":true,"note":""},{"category":"Entertainment","display":"E 24 (576p)","url":"https://mumt04.tangotv.in/m18aqlK4E24/index.m3u8","source_name":"E 24 (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_E24/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Entertainment","display":"Mahaa Max (1080p)","url":"https://mumbai-edge.smartplaytv.in/MahaMax/index.m3u8","source_name":"Mahaa Max (1080p)","logo":"https://objectstorage.ap-mumbai-1.oraclecloud.com/p/7Eg7LPw1gBcncVDrfwf__7yyrg13awaU6DmMk4gutavGYZgoAuAziv8e0aSEdU4G/n/bmaqqlwez184/b/GTPL_CHANNEL_LOGO/o/gtpl/MAHAA+MAX+LOGO.png","available":true,"note":""},{"category":"Entertainment","display":"Manoranjan Prime (576p)","url":"https://mumt06.tangotv.in/qYyB8fXVMANORANJANPRIME/index.m3u8","source_name":"Manoranjan Prime (576p)","logo":"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjrGNUi4TMw8UslbIJF1ja-NrA1Ps656h9cxrj6aTfl3Cm-_C2gxtBBAKz-fLdPk7rJ0YrXfNvcQaBSDFTUdPgSYt8sBA0xn4aSMPnl-J2hiKa7P3Ybjd3BlE3XjoAJ0d7HNvhy8mZFDbf1JfAdMVBpdnPBuim3y3x0zMw1D3ryOw3NCoOsPA5fMMplPbU/s500/manoranjan-prime-tv-schedule-on-dd-freedish.jpg","available":true,"note":""},{"category":"Entertainment","display":"Manoranjan TV (720p)","url":"https://cdn.pishow.tv/ott/live/1013/master.m3u8","source_name":"Manoranjan TV (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MANORANJAN_TV/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Entertainment","display":"MK Six (576p)","url":"https://mumt06.tangotv.in/qYyB8fXVMKSIX/index.m3u8","source_name":"MK Six (576p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/MK_Six.png","available":true,"note":""},{"category":"Entertainment","display":"Shemaroo TV (720p)","url":"https://airtelapp.shemaroo.com/shemarootv/smil:shemarootvadp.smil/playlist.m3u8","source_name":"Shemaroo TV (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHEMAROO_TV/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Entertainment","display":"Shemaroo Umang (720p)","url":"https://airtelapp.shemaroo.com/shemarooumang/smil:shemarooumangadp.smil/playlist.m3u8","source_name":"Shemaroo Umang (720p)","logo":"https://dtil.tmsimg.com/assets/s143779_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Entertainment","display":"Sony Entertainment Television (576p)","url":"http://103.151.60.162:2122/play/a015/index.m3u8?hls","source_name":"Sony Entertainment Television (576p)","logo":"https://dtil.tmsimg.com/assets/s157589_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Entertainment","display":"Sony Entertainment Television HD (1080p)","url":"http://38.96.178.205/SONYHD/index.m3u8","source_name":"Sony Entertainment Television HD (1080p)","logo":"https://dtil.tmsimg.com/assets/s159096_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"Goldmines Action (576p)","url":"https://mumt03.tangotv.in/Dsly5z3HGOLDMINESACTION/index.m3u8","source_name":"Goldmines Action (576p)","logo":"https://yt3.googleusercontent.com/_X6U6bMLF-pTu5wBMFwsSI6aubGrXk2B0kUKdGiLIMqFLyDIne4Ot4ro76BS1S8fX3pWcCwS=s900-c-k-c0x00ffffff-no-rj","available":true,"note":""},{"category":"Movies","display":"India Talkies (360p)","url":"https://samitaorigin.tangotv.in/INDIATALKIES/SAMITAORIGIN/index.m3u8","source_name":"India Talkies (360p)","logo":"https://papaji.freetvindia.com/media/FreeTV_India_Talkies.png","available":true,"note":""},{"category":"Movies","display":"Maha Movie (576p)","url":"https://cdn.pishow.tv/ott/live/10007/master.m3u8","source_name":"Maha Movie (576p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/Maha_Movies.png","available":true,"note":""},{"category":"Movies","display":"Manoranjan Grand (720p)","url":"https://cdn.pishow.tv/ott/live/1011/master.m3u8","source_name":"Manoranjan Grand (720p)","logo":"https://dtil.tmsimg.com/assets/s143302_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"MH One Movies (576p)","url":"https://mumt03.tangotv.in/Dsly5z3HMHONEMOVIE/index.m3u8","source_name":"MH One Movies (576p)","logo":"","available":true,"note":""},{"category":"Movies","display":"Manoranjan Movies (576p)","url":"https://mumt04.tangotv.in/m18aqlK4MANORANJANMOVIES/index.m3u8","source_name":"Manoranjan Movies (576p)","logo":"https://dtil.tmsimg.com/assets/s143303_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"Shemaroo Josh (576p)","url":"https://mumt04.tangotv.in/m18aqlK4SHEMAROOJOSH/index.m3u8","source_name":"Shemaroo Josh (576p)","logo":"https://dtil.tmsimg.com/assets/GNLZZGG00297P3E.png?lock=720x540","available":true,"note":""},{"category":"Movies","display":"Shubh Cinema TV (720p)","url":"https://d393sxaxig6bax.cloudfront.net/out/v1/589cf2cf44bf42bb941e817a2240d62e/index.m3u8","source_name":"Shubh Cinema TV (720p)","logo":"https://i.imgur.com/RQhorAG.png","available":true,"note":""},{"category":"Movies","display":"Star Gold 2 HD (1080p)","url":"http://103.151.60.162:2122/play/a01v/index.m3u8?hls","source_name":"Star Gold 2 HD (1080p)","logo":"https://i.imgur.com/G0ZfzZr.png","available":true,"note":""},{"category":"Movies","display":"South Station (1080p)","url":"https://cc-yw7ztecy8do3q.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-yw7ztecy8do3q/SS_IN.m3u8","source_name":"South Station (1080p)","logo":"https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN3800008CX_20260325T012316SQUARE.png","available":true,"note":""},{"category":"Sports","display":"DD Sports HD (1080p)","url":"https://cdn.pishow.tv/ott/live/1161/master.m3u8","source_name":"DD Sports HD (1080p)","logo":"https://dtil.tmsimg.com/assets/s158255_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"Kids","display":"The Jungle Book (1080p)","url":"https://cc-4bhi5osabejc9.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/junglebook.m3u8","source_name":"The Jungle Book (1080p)","logo":"https://pash.ink/storage/uploads/JungleBook_Logo.png","available":true,"note":""},{"category":"Sports","display":"Sony Sports Ten 1 (576p)","url":"http://103.151.60.162:2122/play/a01c/index.m3u8?hls","source_name":"Sony Sports Ten 1 (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_1/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Sports","display":"Sony Sports Ten 2 (576p)","url":"http://103.151.60.162:2122/play/a01b/index.m3u8?hls","source_name":"Sony Sports Ten 2 (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_2/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Sports","display":"Sony Sports Ten 3 Hindi (576p)","url":"http://103.151.60.162:2122/play/a01t/index.m3u8?hls","source_name":"Sony Sports Ten 3 Hindi (576p)","logo":"https://dtil.tmsimg.com/assets/GNLZZGG0025TCMR.png?lock=720x540","available":true,"note":""},{"category":"Sports","display":"Sony Sports Ten 5 (576p)","url":"http://103.151.60.162:2122/play/a028/index.m3u8?hls","source_name":"Sony Sports Ten 5 (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_5/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Sports","display":"Star Sports 2 (576p)","url":"http://103.151.60.162:2122/play/a00v/index.m3u8?hls","source_name":"Star Sports 2 (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_STAR_SPORTS_2/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Sports","display":"Star Sports 2 Telugu HD (576p)","url":"https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8","source_name":"Star Sports 2 Telugu HD (576p)","logo":"https://i.imgur.com/m7DvvqF.png","available":true,"note":""},{"category":"Sports","display":"Star Sports Select 1 HD (1080p)","url":"http://103.151.60.162:2122/play/a026/index.m3u8?hls","source_name":"Star Sports Select 1 HD (1080p)","logo":"https://i.imgur.com/Mh9tKPx.png","available":true,"note":""},{"category":"Sports","display":"Star Sports Select 2 HD (1080p)","url":"http://103.151.60.162:2122/play/a027/index.m3u8?hls","source_name":"Star Sports Select 2 HD (1080p)","logo":"https://i.imgur.com/FtRT73R.png","available":true,"note":""},{"category":"Entertainment","display":"&TV (720p)","url":"https://drk6xq0vhn.gpcdn.net/live/and_tv_hd_abr/index.m3u8","source_name":"&TV (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SYMANDTV/images/LOGO_HD/LOGO_HD_image.png","available":true,"note":""},{"category":"News","display":"Aaj Tak HD (1080p)","url":"https://feeds.intoday.in/aajtak/api/aajtakhd/master.m3u8","source_name":"Aaj Tak HD (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_AAJ_TAK/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"ABP News (1080p)","url":"https://d1rc86nwwc9fag.cloudfront.net/vglive-sk-472500/abpnews/master.m3u8","source_name":"ABP News (1080p)","logo":"https://dtil.tmsimg.com/assets/s158138_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"News","display":"ANB News (720p)","url":"https://server.livelegitpro.in:9899/anbnews/anbnews/index.m3u8","source_name":"ANB News (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ANB_NEWS/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"Bharat AtoZ (720p)","url":"https://live.ekamraott.com/4tv/bharata2z/index.m3u8","source_name":"Bharat AtoZ (720p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/Bharat_AtoZ.png","available":true,"note":""},{"category":"News","display":"Bharat Express (576p)","url":"https://mumt07.tangotv.in/zHjX9OFlBHARATEXPRESS/index.m3u8","source_name":"Bharat Express (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHARAT_EXPRESS/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"Bharat Samachar (576p)","url":"https://mumt03.tangotv.in/Dsly5z3HBHARATSAMACHAR/index.m3u8","source_name":"Bharat Samachar (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHARAT_SAMACHAR/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"Cnews Bharat (720p)","url":"https://legitpro.co.in/cnews/cnews/index.fmp4.m3u8","source_name":"Cnews Bharat (720p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/C_News_Bharat.png","available":true,"note":""},{"category":"News","display":"DD News (1080p)","url":"https://mumbai-edge.smartplaytv.in/DDNews/index.m3u8","source_name":"DD News (1080p)","logo":"https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20News%20HD.png","available":true,"note":""},{"category":"News","display":"DD News HD (1080p)","url":"https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/0811cd8c37ca4c409d5385a6cd2fa18b/index.m3u8","source_name":"DD News HD (1080p)","logo":"https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20News%20HD.png","available":true,"note":""},{"category":"Kids","display":"Epic Kids Digital (1080p)","url":"https://cc-t8lqe1o99pszu.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-t8lqe1o99pszu/playlist.m3u8","source_name":"Epic Kids Digital (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GUBBARE/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"First India News (576p)","url":"https://mumt03.tangotv.in/Dsly5z3H1STINDIANEWS/index.m3u8","source_name":"First India News (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_FIRST_INDIA_NEWS_RAJASTHAN/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Kids","display":"Green Gold TV (1080p)","url":"https://cc-szrmqvu8zkg16.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-szrmqvu8zkg16/greengold/stream/grngld/playlist.m3u8","source_name":"Green Gold TV (1080p)","logo":"https://i.ibb.co/TDPsPVkT/Greengoldtv.png","available":true,"note":""},{"category":"News","display":"Mh 1 News (576p)","url":"https://streams.tangotv.in/MHONENEWS/ORIGIN/index.m3u8","source_name":"Mh 1 News (576p)","logo":"https://dtil.tmsimg.com/assets/s143540_ld_h15_aa.png?lock=720x540","available":true,"note":""},{"category":"News","display":"Nation News (720p)","url":"https://server.playontv.in/nationnews/index.m3u8","source_name":"Nation News (720p)","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/nationnews.png","available":true,"note":""},{"category":"News","display":"News 1 India (576p)","url":"https://mumt07.tangotv.in/zHjX9OFlNEWS1INDIA/index.m3u8","source_name":"News 1 India (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_1_INDIA/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Movies","display":"Pitaara (720p)","url":"https://vg-pitaaratvlive.akamaized.net/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/vglive-sk-583798/playlist.m3u8","source_name":"Pitaara (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PITAARA/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Movies","display":"Pocket Films","url":"https://vglivessai.akamaized.net/sg/v1/manifest/611d79b11b77e2f571934fd80ca1413453772ac7/b8ada260-bb81-472b-b7c1-3a79213a84b8/e02a0ce5-6c42-4cca-bb53-e5cfecff74a9/0.m3u8","source_name":"Pocket Films","logo":"https://jiotvimages.cdn.jio.com/dare_images/images/p_pktflm.png","available":true,"note":""},{"category":"Movies","display":"Public Movies (576p)","url":"https://mumt04.tangotv.in/m18aqlK4PUBLICMOVIES/index.m3u8","source_name":"Public Movies (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PUBLIC_MOVIES/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Movies","display":"The Movie Club +2 (1080p)","url":"https://d3gnyty2vddhsg.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/pb-ytipwjqub3kf8/TMC2_IN.m3u8?ads.ads_cdn=cf&ads.cdn=cf","source_name":"The Movie Club +2 (1080p)","logo":"https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN40000100Y_20260204T004058SQUARE.png","available":true,"note":""},{"category":"News","display":"Times Now Navbharat (1080p)","url":"https://raw.githubusercontent.com/amazeyourself/adaptive-streams/refs/heads/main/streams/in/YuppTV/TimesNowNavbharat.m3u8","source_name":"Times Now Navbharat (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TIMES_NOW_NAVBHARAT_HD/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"Times Now Navbharat HD (1080p)","url":"https://yupprestreamliveus.akamaized.net/v1/vglive-sk-717514/main.m3u8","source_name":"Times Now Navbharat HD (1080p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TIMES_NOW_NAVBHARAT_HD/images/LOGO_HD/image.png","available":true,"note":""},{"category":"News","display":"TV7 Bharat (576p)","url":"https://stream.ottlive.co.in/tv7bharat/index.m3u8","source_name":"TV7 Bharat (576p)","logo":"https://tv7bharat.tv/wp-content/uploads/2023/07/Logo-Bharat.jpg","available":true,"note":""},{"category":"News","display":"TV9 Bharatvarsh (720p)","url":"https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9hinjzgtpe/liveabr/playlist.m3u8","source_name":"TV9 Bharatvarsh (720p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_BHARATVARSH/images/LOGO_HD/image.png","available":true,"note":""},{"category":"Entertainment","display":"Zee TV (576p)","url":"http://103.151.60.162:2122/play/a01u/index.m3u8?hls","source_name":"Zee TV (576p)","logo":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_TV/images/LOGO_HD/LOGO_HD_image.png","available":true,"note":""}];
+let channels = homeChannels;
+let categories = ['All', ...new Set(homeChannels.map(c => c.category).filter(Boolean))];
+let currentMode = 'home';
+let playlistLoaded = false;
+let playlistChannels = [];
+const video = document.getElementById('video');
+const videoBox = document.getElementById('videoBox');
+const playerStage = document.getElementById('playerStage');
+const videoOverlay = document.getElementById('videoOverlay');
+let fitModes = ['contain','cover','fill'];
+let fitModeIndex = 0;
+let fullscreenHideTimer = null;
+let mobileHideTimer = null;
+function revealPlayerControls() {
+  playerStage.classList.remove('controls-hidden');
+  if (document.fullscreenElement === playerStage) { revealFullscreenControls(); return; }
+  clearTimeout(mobileHideTimer);
+  if (window.matchMedia('(max-width: 600px)').matches) {
+    mobileHideTimer = window.setTimeout(() => playerStage.classList.add('controls-hidden'), 4000);
+  }
+}
+function revealFullscreenControls() {
+  if (document.fullscreenElement !== playerStage) return;
+  playerStage.classList.remove('controls-hidden');
+  clearTimeout(fullscreenHideTimer);
+  fullscreenHideTimer = window.setTimeout(() => {
+    if (document.fullscreenElement === playerStage) playerStage.classList.add('controls-hidden');
+  }, 4000);
+}
+const nowTitle = document.getElementById('nowTitle');
+const statusEl = document.getElementById('status');
+const openUrl = document.getElementById('openUrl');
+const searchInput = document.getElementById('search');
+let currentCategory = 'All';
+let activeUrl = '';
+let hls = null;
+
+function createFilters(target) {
+  target.innerHTML = '';
+  categories.forEach(category => {
+    const button = document.createElement('button');
+    button.className = 'filter' + (currentCategory === category ? ' active' : '');
+    button.type = 'button';
+    button.textContent = category;
+    button.dataset.category = category;
+    button.addEventListener('click', () => { currentCategory = category; render(); const guide = document.getElementById('fullscreenGuide'); if (guide && !guide.hidden) { renderGuide(); [...document.querySelectorAll('#guideFilters [data-category]')].find(button => button.dataset.category === category)?.focus(); } });
+    target.appendChild(button);
+  });
+}
+function channelButton(c) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'channel' + (c.url && c.url === activeUrl ? ' active' : '') + (!c.available ? ' not-found' : '');
+  button.disabled = !c.available || !c.url;
+  button.dataset.channelUrl = c.url || '';
+  const logo = c.logo ? document.createElement('img') : document.createElement('div');
+  if (c.logo) {
+    logo.className = 'logo';
+    logo.src = c.logo;
+    logo.alt = '';
+    logo.loading = 'lazy';
+    logo.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'logo-fallback';
+      fallback.textContent = 'TV';
+      logo.replaceWith(fallback);
+    };
+  } else {
+    logo.className = 'logo-fallback';
+    logo.textContent = 'TV';
+  }
+  const info = document.createElement('span');
+  info.className = 'ch-info';
+  const name = document.createElement('span');
+  name.className = 'ch-name';
+  name.textContent = c.display;
+  const meta = document.createElement('span');
+  meta.className = 'ch-meta';
+  meta.innerHTML = '<span class="live-dot"></span>' + (c.available ? (c.source_name.match(/\((\d+p)\)/)?.[1] || 'Stream listed') : 'Not found in playlist');
+  info.append(name, meta);
+  button.append(logo, info);
+  button.title = c.note || c.source_name || c.display;
+  button.addEventListener('click', () => playChannel(c));
+  return button;
+}
+function renderList(target, empty, mobile=false) {
+  target.innerHTML = '';
+  const query = searchInput.value.trim().toLowerCase();
+  const list = channels.filter(c =>
+    (currentCategory === 'All' || c.category === currentCategory) &&
+    (c.display.toLowerCase().includes(query) || c.source_name.toLowerCase().includes(query))
+  );
+  list.forEach(c => target.appendChild(channelButton(c)));
+  empty.style.display = list.length ? 'none' : 'block';
+}
+function visibleChannels() {
+  const query = searchInput.value.trim().toLowerCase();
+  return channels.filter(c =>
+    (currentCategory === 'All' || c.category === currentCategory) &&
+    (c.display.toLowerCase().includes(query) || c.source_name.toLowerCase().includes(query))
+  );
+}
+function render() {
+  const focusedChannelUrl = document.activeElement?.dataset?.channelUrl;
+  const focusedCategory = document.activeElement?.dataset?.category;
+  createFilters(document.getElementById('desktopFilters'));
+  createFilters(document.getElementById('mobileFilters'));
+  if (window.innerWidth <= 900) {
+    renderList(document.getElementById('mobileList'), document.getElementById('mobileEmpty'), true);
+    document.getElementById('desktopList').innerHTML = '';
+  } else {
+    renderList(document.getElementById('desktopList'), document.getElementById('desktopEmpty'));
+    document.getElementById('mobileList').innerHTML = '';
+  }
+  const filterHost = document.getElementById(window.innerWidth <= 900 ? 'mobileFilters' : 'desktopFilters');
+  if (focusedCategory) filterHost.querySelector(`[data-category="${CSS.escape(focusedCategory)}"]`)?.focus();
+  if (focusedChannelUrl) document.querySelector(`#${window.innerWidth <= 900 ? 'mobileList' : 'desktopList'} [data-channel-url="${CSS.escape(focusedChannelUrl)}"]`)?.focus();
+}
+function stopCurrent() {
+  if (hls) { hls.destroy(); hls = null; }
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+  videoOverlay.hidden = false;
+}
+function playChannel(c) {
+  if (!c.url) return;
+  closeGuide();
+  stopCurrent();
+  activeUrl = c.url;
+  videoOverlay.hidden = true;
+  nowTitle.textContent = c.display;
+  statusEl.textContent = 'Connecting to stream…';
+  revealPlayerControls();
+  openUrl.href = c.url;
+  openUrl.hidden = false;
+  render();
+
+  if (window.Hls && Hls.isSupported()) {
+    hls = new Hls({enableWorker:true, lowLatencyMode:true});
+    hls.loadSource(c.url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      statusEl.textContent = 'Stream loaded. Starting playback…';
+      video.play().then(() => {
+        statusEl.textContent = 'Now playing';
+      }).catch(() => {
+        statusEl.textContent = 'Stream loaded — press Play on the video.';
+      });
+    });
+    hls.on(Hls.Events.ERROR, (_, data) => {
+      if (data.fatal) {
+        statusEl.textContent = 'Playback failed. Stream may be offline or may block browser access. Try “Open stream directly”.';
+        if (hls) { hls.destroy(); hls = null; }
+      }
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = c.url;
+    video.play().then(() => statusEl.textContent = 'Now playing')
+      .catch(() => statusEl.textContent = 'Press Play, or use “Open stream directly”.');
+  } else {
+    statusEl.textContent = 'This browser cannot play HLS directly. Try an updated Chrome browser or VLC.';
+  }
+}
+function parseM3U(text, baseUrl) {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
+  const parsed = [];
+  let info = '';
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    if (line.startsWith('#EXTINF:')) { info = line; continue; }
+    if (line.startsWith('#')) continue;
+    let streamUrl;
+    try { streamUrl = new URL(line, baseUrl || window.location.href).href; } catch { info = ''; continue; }
+    if (!/^https?:\/\//i.test(streamUrl)) { info = ''; continue; }
+    const comma = info.indexOf(',');
+    const attrs = comma >= 0 ? info.slice(0, comma) : info;
+    const title = comma >= 0 ? info.slice(comma + 1).trim() : '';
+    const attr = name => attrs.match(new RegExp('(?:^|\\s)' + name + '="([^"]*)"', 'i'))?.[1] || '';
+    const display = attr('tvg-name') || title || attr('tvg-id') || line;
+    parsed.push({category: attr('group-title') || 'Other', display, url: streamUrl, source_name: display, logo: attr('tvg-logo'), available: true, note: ''});
+    info = '';
+  }
+  return parsed;
+}
+async function loadLocalPlaylist(file) {
+  const message = document.getElementById('playlistMessage');
+  if (!file) return;
+  message.textContent = `Reading ${file.name}…`;
+  try {
+    const parsed = parseM3U(await file.text(), window.location.href);
+    if (!parsed.length) throw new Error('Is file mein playable HTTP/HTTPS channel URL nahi mile.');
+    channels = parsed;
+    playlistChannels = parsed;
+    playlistLoaded = true;
+    categories = ['All', ...new Set(parsed.map(c => c.category).filter(Boolean))];
+    currentCategory = 'All';
+    message.textContent = `${file.name}: ${parsed.length.toLocaleString()} channels loaded. Search se channel filter karein.`;
+    render();
+  } catch (error) {
+    message.textContent = `Local playlist load nahi hui: ${error.message}`;
+  }
+}
+function setMode(mode) {
+  currentMode = mode;
+  document.body.classList.toggle('m3u-mode', mode === 'm3u');
+  document.getElementById('homeMode').classList.toggle('active', mode === 'home');
+  document.getElementById('m3uMode').classList.toggle('active', mode === 'm3u');
+  document.getElementById('playlistBar').hidden = mode !== 'm3u';
+  document.getElementById('playlistMessage').textContent = mode === 'home' ? '' : (playlistLoaded ? `${playlistChannels.length.toLocaleString()} channels loaded` : 'M3U / M3U8 playlist URL paste karke Load playlist dabayein.');
+  if (mode === 'home') {
+    channels = homeChannels;
+    categories = ['All', ...new Set(homeChannels.map(c => c.category).filter(Boolean))];
+  } else {
+    channels = playlistLoaded ? playlistChannels : [];
+    categories = playlistLoaded ? ['All', ...new Set(playlistChannels.map(c => c.category).filter(Boolean))] : ['All'];
+  }
+  currentCategory = 'All';
+  render();
+}
+async function loadPlaylist() {
+  const url = document.getElementById('playlistUrl').value.trim();
+  const message = document.getElementById('playlistMessage');
+  if (!url) { message.textContent = 'M3U / M3U8 URL enter karein.'; return; }
+  message.textContent = 'Playlist load ho rahi hai…';
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const parsed = parseM3U(await response.text(), url);
+    if (!parsed.length) throw new Error('Playlist mein playable channel URL nahi mile.');
+    channels = parsed;
+    playlistChannels = parsed;
+    playlistLoaded = true;
+    categories = ['All', ...new Set(parsed.map(c => c.category).filter(Boolean))];
+    currentCategory = 'All';
+    message.textContent = `${parsed.length.toLocaleString()} channels loaded. Search se channel filter karein.`;
+    render();
+  } catch (error) {
+    message.textContent = `Playlist load nahi hui: ${error.message}. Server CORS access allow nahi karta ho sakta hai.`;
+  }
+}
+document.getElementById('homeMode').addEventListener('click', () => setMode('home'));
+document.getElementById('m3uMode').addEventListener('click', () => setMode('m3u'));
+document.getElementById('loadPlaylist').addEventListener('click', loadPlaylist);
+document.getElementById('chooseLocalPlaylist').addEventListener('click', () => document.getElementById('localPlaylistFile').click());
+document.getElementById('localPlaylistFile').addEventListener('change', event => { loadLocalPlaylist(event.target.files[0]); event.target.value = ''; });
+document.getElementById('playlistUrl').addEventListener('keydown', event => { if (event.key === 'Enter') loadPlaylist(); });
+window.addEventListener('resize', render);
+function renderGuide() {
+  createFilters(document.getElementById('guideFilters'));
+  const list = document.getElementById('guideList');
+  const empty = document.getElementById('guideEmpty');
+  list.innerHTML = '';
+  const visible = visibleChannels();
+  visible.forEach(channel => list.appendChild(channelButton(channel)));
+  empty.style.display = visible.length ? 'none' : 'block';
+}
+function closeGuide() {
+  const guide = document.getElementById('fullscreenGuide');
+  if (!guide || guide.hidden) return;
+  guide.hidden = true;
+  document.getElementById('openGuide').focus();
+  revealFullscreenControls();
+}
+function changeChannel(step) {
+  const list = visibleChannels().filter(c => c.available && c.url);
+  if (!list.length) return;
+  const currentIndex = list.findIndex(c => c.url === activeUrl);
+  const nextIndex = currentIndex < 0 ? (step > 0 ? 0 : list.length - 1) : (currentIndex + step + list.length) % list.length;
+  playChannel(list[nextIndex]);
+}
+function updatePlayButton() {
+  const button = document.getElementById('playPause');
+  const paused = video.paused;
+  button.innerHTML = paused ? '▶ <span>Play</span>' : '❚❚ <span>Pause</span>';
+  button.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+}
+function applyFitMode() {
+  const mode = fitModes[fitModeIndex];
+  videoBox.classList.remove('fit-contain','fit-cover','fit-fill');
+  videoBox.classList.add(`fit-${mode}`);
+  const labels = {contain:'Fit',cover:'Fill',fill:'Stretch'};
+  const button = document.getElementById('fitMode');
+  button.innerHTML = `▧ <span>${labels[mode]}</span>`;
+  button.setAttribute('aria-label', `Screen mode ${labels[mode]}`);
+}
+document.getElementById('previousChannel').addEventListener('click', () => changeChannel(-1));
+document.getElementById('nextChannel').addEventListener('click', () => changeChannel(1));
+document.getElementById('playPause').addEventListener('click', () => {
+  if (!activeUrl) { changeChannel(1); return; }
+  if (video.paused) video.play().catch(() => { statusEl.textContent = 'Playback could not start. Press Play again or choose another channel.'; });
+  else video.pause();
+});
+video.addEventListener('play', updatePlayButton);
+video.addEventListener('pause', updatePlayButton);
+document.getElementById('fitMode').addEventListener('click', () => { fitModeIndex = (fitModeIndex + 1) % fitModes.length; applyFitMode(); });
+async function lockLandscapeForFullscreen() {
+  const orientation = window.screen && window.screen.orientation;
+  if (orientation && typeof orientation.lock === 'function') {
+    try { await orientation.lock('landscape'); } catch { /* Browser may restrict orientation locking. */ }
+  }
+}
+document.getElementById('fullScreen').addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else if (playerStage.requestFullscreen) {
+      await playerStage.requestFullscreen();
+      await lockLandscapeForFullscreen();
+    }
+    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+  } catch { statusEl.textContent = 'Fullscreen is not available in this browser.'; }
+});
+document.addEventListener('fullscreenchange', () => {
+  const button = document.getElementById('fullScreen');
+  const active = document.fullscreenElement === playerStage;
+  button.innerHTML = active ? '⛶ <span>Exit fullscreen</span>' : '⛶ <span>Full screen</span>';
+  button.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+if (active) { revealFullscreenControls(); lockLandscapeForFullscreen(); }
+  else { clearTimeout(fullscreenHideTimer); playerStage.classList.remove('controls-hidden'); if (window.screen && window.screen.orientation && window.screen.orientation.unlock) window.screen.orientation.unlock(); }
+});
+playerStage.addEventListener('pointermove', revealPlayerControls);
+playerStage.addEventListener('pointerdown', revealPlayerControls);
+playerStage.addEventListener('touchstart', revealPlayerControls, {passive:true});
+document.getElementById('openGuide').addEventListener('click', () => {
+  const guide = document.getElementById('fullscreenGuide');
+  guide.hidden = false;
+  renderGuide();
+  revealFullscreenControls();
+  setTimeout(() => (document.querySelector('#guideList .channel.active') || document.querySelector('#guideList .channel') || document.getElementById('closeGuide')).focus(), 0);
+});
+document.getElementById('closeGuide').addEventListener('click', closeGuide);
+document.getElementById('volumeControl').addEventListener('input', event => {
+  video.volume = Number(event.target.value);
+  if (video.volume > 0 && video.muted) video.muted = false;
+});
+document.getElementById('muteToggle').addEventListener('click', () => {
+  video.muted = !video.muted;
+  const button = document.getElementById('muteToggle');
+  button.innerHTML = video.muted ? '🔇 <span>Muted</span>' : '🔊 <span>Sound</span>';
+  button.setAttribute('aria-label', video.muted ? 'Unmute' : 'Mute');
+});
+video.addEventListener('volumechange', () => {
+  document.getElementById('volumeControl').value = String(video.volume);
+  const button = document.getElementById('muteToggle');
+  button.innerHTML = video.muted ? '🔇 <span>Muted</span>' : '🔊 <span>Sound</span>';
+  button.setAttribute('aria-label', video.muted ? 'Unmute' : 'Mute');
+});
+videoBox.addEventListener('pointerdown', event => event.stopPropagation());
+videoBox.addEventListener('touchstart', event => event.stopPropagation(), {passive:true});
+videoBox.addEventListener('click', () => {
+  if (playerStage.classList.contains('controls-hidden')) revealPlayerControls();
+  else { playerStage.classList.add('controls-hidden'); clearTimeout(fullscreenHideTimer); clearTimeout(mobileHideTimer); }
+});
+videoBox.addEventListener('dblclick', () => document.getElementById('fullScreen').click());
+document.addEventListener('keydown', event => {
+  revealPlayerControls();
+  if (event.key === 'Escape' && !document.getElementById('fullscreenGuide').hidden) { event.preventDefault(); closeGuide(); return; }
+  if (document.fullscreenElement === playerStage && document.getElementById('fullscreenGuide').hidden && (event.key === 'ArrowUp' || event.key === 'ArrowDown') && event.target.tagName !== 'INPUT' && !event.target.isContentEditable) { event.preventDefault(); changeChannel(event.key === 'ArrowUp' ? -1 : 1); return; }
+  if (event.target.matches('input,textarea,select,[contenteditable="true"]')) return;
+  if (event.key === ' ' && !event.target.matches('button,a')) { event.preventDefault(); document.getElementById('playPause').click(); }
+  if (event.key.toLowerCase() === 'f') document.getElementById('fullScreen').click();
+  if (event.key.toLowerCase() === 'm') document.getElementById('muteToggle').click();
+  if (event.key.toLowerCase() === 'j') changeChannel(-1);
+  if (event.key.toLowerCase() === 'k') changeChannel(1);
+});
+applyFitMode();
+updatePlayButton();
+document.getElementById('stop').addEventListener('click', () => {
+  stopCurrent();
+  activeUrl = '';
+  nowTitle.textContent = 'Choose a channel to start watching';
+  statusEl.textContent = 'Playback stopped.';
+  openUrl.hidden = true;
+  render();
+});
+document.getElementById('topSearch').addEventListener('submit', e => e.preventDefault());
+searchInput.addEventListener('input', render);
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', {scope: './'}).catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
