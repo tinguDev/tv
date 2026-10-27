@@ -1,6 +1,0 @@
-Zoolo TV PWA deployment
-
-Upload every file and folder in this directory to the same directory on your static web host.
-The host must serve the site over HTTPS for installation and service workers (localhost is allowed for local development).
-Open the deployed address in a supported mobile browser and use its Install app / Add to Home Screen option.
-Keep index.html, manifest.json, sw.js, and icons/ together. The app shell can reopen offline; live streams still need internet.
