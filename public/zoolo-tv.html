@@ -147,6 +147,18 @@ h1{font-size:20px;line-height:1.35;margin:0 0 5px;font-weight:700}
 /* Keep play as a compact icon button; never let it stretch across the control bar */
 #playPause,#bottomPlayPause{flex:0 0 42px!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:#e5093a!important;color:#fff!important;font-size:17px!important;box-shadow:none!important}
 @media(max-width:600px){#playPause,#bottomPlayPause{flex-basis:34px!important;width:34px!important;min-width:34px!important;height:32px!important;min-height:32px!important;padding:0!important;border-radius:9px!important}}
+
+/* Group transport controls on the left and utility controls on the right */
+.player-controls{justify-content:space-between}
+.control-primary,.control-secondary{display:flex;align-items:center;justify-content:flex-start;gap:8px;width:auto}
+.control-primary{flex:0 0 auto}
+.control-secondary{margin-left:auto}
+@media(max-width:900px){.player-controls{height:42px;min-height:42px;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:4px;padding:4px 6px}.control-primary,.control-secondary{display:flex;align-items:center;justify-content:flex-start;gap:4px;width:auto}.control-primary{flex:0 0 auto}.control-secondary{margin-left:auto}.control-primary .player-control{flex:0 0 42px;width:42px;min-width:42px;height:40px;min-height:40px;padding:0}.control-secondary .player-control{flex:0 0 40px;width:40px;min-width:40px;height:38px;min-height:38px;padding:0}.control-secondary .volume-control{min-width:62px}}
+@media(max-width:600px){.player-controls{height:42px;min-height:42px;gap:3px;padding:4px 6px}.control-primary,.control-secondary{gap:3px}.control-primary .player-control,.control-secondary .player-control{flex:0 0 34px;width:34px;min-width:34px;height:32px;min-height:32px;padding:0;border:0;background:transparent;font-size:17px}.control-primary .player-control.primary,.control-secondary .player-control.primary{background:#e5093a}.control-secondary .volume-control{display:none}}
+.player-stage:fullscreen .player-controls{justify-content:space-between}
+.player-stage:fullscreen .control-primary,.player-stage:fullscreen .control-secondary{position:static;display:flex;align-items:center;justify-content:flex-start;width:auto;transform:none;pointer-events:auto}
+.player-stage:fullscreen .control-primary{flex:0 0 auto}
+.player-stage:fullscreen .control-secondary{margin-left:auto}
 </style>
 </head>
 <body>
